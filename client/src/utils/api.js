@@ -13,18 +13,15 @@ const handleRequestError = (error, message) => {
   throw error;
 };
 
-// Example function to check session status
 export const checkSession = async () => {
   try {
-    const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/auth/test-session`, {
-      withCredentials: true,
-    });
-    console.log("Session response:", response.data);
+    const response = await api.get('/auth/user');
     return response.data;
   } catch (error) {
-    handleRequestError(error, "Session failed");
+    handleRequestError(error, "Session check failed");
   }
 };
+
 
 // Login function using session-based authentication
 export const loginUser = async (loginData) => {

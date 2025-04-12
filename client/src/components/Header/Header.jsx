@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { checkSession, loginUser, logoutUser } from "../../utils/api";
 import { UserContext } from "../../utils/UserContext";
-import LoginModal from "../LoginModal/LoginModal";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -18,52 +16,22 @@ import {
 } from "@/components/ui/navigation-menu";
 import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
 import { Menu, X } from "lucide-react";
+import { useAuth } from "@/utils/AuthContext";
 
 const Header = () => {
   const navigate = useNavigate();
-  const { currentUser, setCurrentUser } = useContext(UserContext);
-  const [showLoginModal, setShowLoginModal] = useState(false);
+  const { currentUser } = useContext(UserContext);
+  const { isAuthenticated, login, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  useEffect(() => {
-    const checkUserSession = async () => {
-      try {
-        const response = await checkSession();
-        if (response.user) {
-          setCurrentUser(response.user);
-        }
-      } catch (error) {
-        console.error("Session check failed:", error);
-      }
-    };
-    checkUserSession();
-  }, [setCurrentUser]);
-
-  const handleLoginData = async ({ email, password }) => {
-    try {
-      const data = await loginUser({ email, password });
-      if (data.user) setCurrentUser(data.user);
-      setShowLoginModal(false);
-    } catch (error) {
-      console.error("Login failed:", error);
-    }
+  // Handle login - uses Auth0 login
+  const handleLogin = () => {
+    login();
   };
 
-  // Updated logout logic using try/catch/finally
-  const handleLogout = async () => {
-    try {
-      await logoutUser();
-    } catch (error) {
-      console.error("Logout failed:", error);
-    } finally {
-      setCurrentUser(null);
-      navigate("/");
-    }
-  };
-
-  const toggleDropdown = () => {
-    setDropdownOpen(!dropdownOpen);
+  // Handle logout - uses Auth0 logout
+  const handleLogout = () => {
+    logout();
   };
 
   return (
@@ -116,7 +84,7 @@ const Header = () => {
 
                   {!currentUser ? (
                     <Button
-                      onClick={() => setShowLoginModal(true)}
+                      onClick={handleLogin}
                       className="w-full bg-[#3f4f24] text-white hover:bg-[#2c3b18]"
                     >
                       Login / Sign Up
@@ -162,7 +130,7 @@ const Header = () => {
             {/* Login / User Dropdown */}
             {!currentUser ? (
               <Button
-                onClick={() => setShowLoginModal(true)}
+                onClick={handleLogin}
                 className="bg-[#3f4f24] text-white hover:bg-[#2c3b18]"
               >
                 Login / Sign Up
@@ -230,7 +198,7 @@ const Header = () => {
 
             {!currentUser ? (
               <Button
-                onClick={() => setShowLoginModal(true)}
+                onClick={handleLogin}
                 className="w-full px-5 py-3 text-base font-semibold text-white bg-[#576756] rounded-md hover:bg-[#001530] transition"
               >
                 Login / Sign Up
@@ -245,13 +213,6 @@ const Header = () => {
             )}
           </div>
         </nav>
-      )}
-
-      {showLoginModal && (
-        <LoginModal
-          onSubmit={handleLoginData}
-          onClose={() => setShowLoginModal(false)}
-        />
       )}
     </header>
   );
